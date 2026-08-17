@@ -1,5 +1,5 @@
 {
-  "name": "photo-release-management",
+  "name": "msu-denver-photo-release-management",
   "private": true,
   "scripts": {
     "db:seed": "psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -f supabase/seed_admins.sql"
