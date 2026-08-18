@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState, type FormEvent } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { ThemedHeader } from '../components/ThemedHeader'
 import { SignaturePad, type SignaturePadHandle } from '../components/SignaturePad'
 import { useTheme } from '../theme/ThemeProvider'
@@ -13,12 +13,14 @@ interface TouchedFields {
   email: boolean
 }
 
-// Public, unauthenticated. Route: /consent/:token. Submit is wired to
-// create_photo_release in I2 — for now the CTA only gates on client-side
-// validity (server independently re-validates everything per FR6).
+// Public, unauthenticated. Route: /consent/:token. Submit navigates straight
+// to the confirmation screen for now — I2 wires the actual
+// create_photo_release call in before that navigation (server independently
+// re-validates everything per FR6 regardless of this client-side gating).
 export function ConsentFormPage() {
   const { token } = useParams<{ token: string }>()
   const theme = useTheme()
+  const navigate = useNavigate()
 
   const [fullName, setFullName] = useState('')
   const [phone, setPhone] = useState('')
@@ -46,8 +48,11 @@ export function ConsentFormPage() {
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault()
-    // I2 wires this to create_photo_release(consent_token, ...) and
-    // navigates to F4's confirmation screen on success.
+    if (!canSubmit) return
+    // Stubbed success path. I2 replaces this with a real
+    // create_photo_release(consent_token, ...) call, keeping this same
+    // navigation on success and surfacing 400/401 errors inline otherwise.
+    navigate('/consent/confirmation')
   }
 
   return (
