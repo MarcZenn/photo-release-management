@@ -1,9 +1,14 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { RouteGuard } from './components/RouteGuard'
+import { AdminRouteGuard } from './components/AdminRouteGuard'
 import { ConsentFormPage } from './routes/ConsentFormPage'
 import { ConfirmationScreen } from './routes/ConfirmationScreen'
 import { StaffLoginPage } from './routes/StaffLoginPage'
+import { DashboardLayout } from './routes/DashboardLayout'
 import { DashboardPage } from './routes/DashboardPage'
+import { AdminAccessManagementPage } from './routes/admin/AdminAccessManagementPage'
+import { AdminLegalNoticeManagementPage } from './routes/admin/AdminLegalNoticeManagementPage'
+import { AdminAuditLogPage } from './routes/admin/AdminAuditLogPage'
 
 export function App() {
   return (
@@ -13,7 +18,14 @@ export function App() {
       <Route path="/consent/:token" element={<ConsentFormPage />} />
       <Route path="/login" element={<StaffLoginPage />} />
       <Route element={<RouteGuard />}>
-        <Route path="/dashboard/*" element={<DashboardPage />} />
+        <Route path="/dashboard" element={<DashboardLayout />}>
+          <Route index element={<DashboardPage />} />
+          <Route element={<AdminRouteGuard />}>
+            <Route path="admin/access" element={<AdminAccessManagementPage />} />
+            <Route path="admin/legal-notice" element={<AdminLegalNoticeManagementPage />} />
+            <Route path="admin/audit-log" element={<AdminAuditLogPage />} />
+          </Route>
+        </Route>
       </Route>
     </Routes>
   )

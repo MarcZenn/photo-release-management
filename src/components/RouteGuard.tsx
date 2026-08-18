@@ -1,10 +1,10 @@
 import { Navigate, Outlet } from 'react-router-dom'
-import { useAuthSession } from '../lib/useAuthSession'
+import { useAuth } from '../auth/AuthSessionProvider'
 
 // Gates /dashboard/* behind an authenticated Supabase session. Server-side
 // allowlist enforcement (B8) is the real security boundary — this is UX only.
 export function RouteGuard() {
-  const { session, loading } = useAuthSession()
+  const { session, loading } = useAuth()
 
   if (loading) {
     return <p>Loading…</p>

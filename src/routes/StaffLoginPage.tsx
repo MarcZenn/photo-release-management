@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ThemedHeader } from '../components/ThemedHeader'
 import { supabase } from '../lib/supabaseClient'
-import { useAuthSession } from '../lib/useAuthSession'
+import { useAuth } from '../auth/AuthSessionProvider'
 import { isValidEmail } from '../lib/validators'
 
 type LoginState = 'idle' | 'sending' | 'sent' | 'error'
@@ -11,7 +11,7 @@ type LoginState = 'idle' | 'sending' | 'sent' | 'error'
 // custom_access_token_hook is the real, server-side allowlist gate.
 export function StaffLoginPage() {
   const navigate = useNavigate()
-  const { session, loading } = useAuthSession()
+  const { session, loading } = useAuth()
 
   const [email, setEmail] = useState('')
   const [state, setState] = useState<LoginState>('idle')
