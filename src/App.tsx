@@ -5,7 +5,8 @@ import { ConsentFormPage } from './routes/ConsentFormPage'
 import { ConfirmationScreen } from './routes/ConfirmationScreen'
 import { StaffLoginPage } from './routes/StaffLoginPage'
 import { DashboardLayout } from './routes/DashboardLayout'
-import { DashboardPage } from './routes/DashboardPage'
+import { SearchDashboardPage } from './routes/SearchDashboardPage'
+import { RecordDetailPage } from './routes/RecordDetailPage'
 import { AdminAccessManagementPage } from './routes/admin/AdminAccessManagementPage'
 import { AdminLegalNoticeManagementPage } from './routes/admin/AdminLegalNoticeManagementPage'
 import { AdminAuditLogPage } from './routes/admin/AdminAuditLogPage'
@@ -19,7 +20,8 @@ export function App() {
       <Route path="/login" element={<StaffLoginPage />} />
       <Route element={<RouteGuard />}>
         <Route path="/dashboard" element={<DashboardLayout />}>
-          <Route index element={<DashboardPage />} />
+          <Route index element={<SearchDashboardPage />} />
+          <Route path="records/:id" element={<RecordDetailPage />} />
           <Route element={<AdminRouteGuard />}>
             <Route path="admin/access" element={<AdminAccessManagementPage />} />
             <Route path="admin/legal-notice" element={<AdminLegalNoticeManagementPage />} />
