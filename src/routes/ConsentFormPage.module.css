@@ -1,11 +1,11 @@
-.consent-form {
+.consentForm {
   max-width: 480px;
   margin: 0 auto;
   padding: 1rem;
   font-size: 16px; /* prevents iOS Safari auto-zoom on focus */
 }
 
-.consent-form__notice {
+.notice {
   max-height: 200px;
   overflow-y: auto;
   border: 1px solid #ccc;
@@ -16,25 +16,25 @@
   line-height: 1.4;
 }
 
-.consent-form__notice-version {
+.noticeVersion {
   font-size: 0.8rem;
   color: #666;
   margin-top: 0.5rem;
 }
 
-.consent-form__field {
+.field {
   margin-bottom: 1rem;
 }
 
-.consent-form__field label {
+.field label {
   display: block;
   margin-bottom: 0.25rem;
   font-weight: 600;
 }
 
-.consent-form__field input[type='text'],
-.consent-form__field input[type='tel'],
-.consent-form__field input[type='email'] {
+.field input[type='text'],
+.field input[type='tel'],
+.field input[type='email'] {
   width: 100%;
   padding: 0.625rem;
   border: 1px solid #999;
@@ -42,26 +42,26 @@
   box-sizing: border-box;
 }
 
-.consent-form__error {
+.error {
   color: #c8102e;
   font-size: 0.85rem;
   margin-top: 0.25rem;
 }
 
-.consent-form__checkbox {
+.checkbox {
   display: flex;
   align-items: flex-start;
   gap: 0.5rem;
   margin-bottom: 1rem;
 }
 
-.consent-form__checkbox input {
+.checkbox input {
   margin-top: 0.2rem;
   width: 1.25rem;
   height: 1.25rem;
 }
 
-.consent-form__age-gate-message {
+.ageGateMessage {
   background-color: #fff4f4;
   border: 1px solid #c8102e;
   border-radius: 4px;
@@ -70,11 +70,11 @@
   font-size: 0.9rem;
 }
 
-.consent-form__signature-actions {
+.signatureActions {
   margin-top: 0.5rem;
 }
 
-.consent-form__submit {
+.submit {
   width: 100%;
   padding: 0.875rem;
   font-size: 1rem;
@@ -84,6 +84,6 @@
   color: #fff;
 }
 
-.consent-form__submit:disabled {
+.submit:disabled {
   background-color: #999;
 }

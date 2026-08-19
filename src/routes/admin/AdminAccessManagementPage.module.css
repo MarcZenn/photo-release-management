@@ -1,0 +1,50 @@
+.accessManagement {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.addForm {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+  margin-bottom: 1.5rem;
+}
+
+.addForm label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+
+.addForm input,
+.addForm select {
+  padding: 0.5rem;
+  border: 1px solid #999;
+  border-radius: 4px;
+}
+
+.accessManagement table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.accessManagement th,
+.accessManagement td {
+  text-align: left;
+  padding: 0.5rem;
+  border-bottom: 1px solid #ddd;
+  vertical-align: top;
+}
+
+.rowError {
+  color: #c8102e;
+  font-size: 0.85rem;
+  margin: 0.25rem 0 0;
+}
+
+.confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}

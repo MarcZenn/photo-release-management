@@ -5,7 +5,7 @@ import { SignaturePad, type SignaturePadHandle } from '../components/SignaturePa
 import { useTheme } from '../theme/ThemeProvider'
 import { isValidEmail, isValidPhone } from '../lib/validators'
 import { legalNoticeText, legalNoticeVersionLabel } from '../content/legalNotice'
-import './ConsentFormPage.css'
+import styles from './ConsentFormPage.module.css'
 
 interface TouchedFields {
   fullName: boolean
@@ -58,16 +58,16 @@ export function ConsentFormPage() {
   return (
     <>
       <ThemedHeader />
-      <main className="consent-form">
+      <main className={styles.consentForm}>
         <form onSubmit={handleSubmit} noValidate>
           <input type="hidden" value={token ?? ''} readOnly />
 
-          <div className="consent-form__notice" aria-label="Legal notice">
+          <div className={styles.notice} aria-label="Legal notice">
             {legalNoticeText}
-            <div className="consent-form__notice-version">Notice version: {legalNoticeVersionLabel}</div>
+            <div className={styles.noticeVersion}>Notice version: {legalNoticeVersionLabel}</div>
           </div>
 
-          <label className="consent-form__checkbox">
+          <label className={styles.checkbox}>
             <input
               type="checkbox"
               checked={noticeAcknowledged}
@@ -77,7 +77,7 @@ export function ConsentFormPage() {
             <span>I have read and acknowledge the legal notice above.</span>
           </label>
 
-          <label className="consent-form__checkbox">
+          <label className={styles.checkbox}>
             <input
               type="checkbox"
               checked={ageAttested}
@@ -88,13 +88,13 @@ export function ConsentFormPage() {
           </label>
 
           {!ageAttested && (
-            <p className="consent-form__age-gate-message" role="alert">
+            <p className={styles.ageGateMessage} role="alert">
               Digital consent is only available for participants 18 or older. If you're under 18, please ask
               MSU Denver staff for the paper photo release form instead.
             </p>
           )}
 
-          <div className="consent-form__field">
+          <div className={styles.field}>
             <label htmlFor="fullName">Full name</label>
             <input
               id="fullName"
@@ -105,10 +105,10 @@ export function ConsentFormPage() {
               autoComplete="name"
               required
             />
-            {touched.fullName && !fullNameValid && <p className="consent-form__error">Name is required.</p>}
+            {touched.fullName && !fullNameValid && <p className={styles.error}>Name is required.</p>}
           </div>
 
-          <div className="consent-form__field">
+          <div className={styles.field}>
             <label htmlFor="phone">Phone number</label>
             <input
               id="phone"
@@ -119,10 +119,10 @@ export function ConsentFormPage() {
               autoComplete="tel"
               required
             />
-            {touched.phone && !phoneValid && <p className="consent-form__error">Enter a valid phone number.</p>}
+            {touched.phone && !phoneValid && <p className={styles.error}>Enter a valid phone number.</p>}
           </div>
 
-          <div className="consent-form__field">
+          <div className={styles.field}>
             <label htmlFor="email">Email</label>
             <input
               id="email"
@@ -133,16 +133,16 @@ export function ConsentFormPage() {
               autoComplete="email"
               required
             />
-            {touched.email && !emailValid && <p className="consent-form__error">Enter a valid email address.</p>}
+            {touched.email && !emailValid && <p className={styles.error}>Enter a valid email address.</p>}
           </div>
 
-          <div className="consent-form__field">
+          <div className={styles.field}>
             <label htmlFor="signature-pad">Signature</label>
             <SignaturePad
               ref={signaturePadRef}
               onStrokeEnd={() => setHasSignature(!(signaturePadRef.current?.isEmpty() ?? true))}
             />
-            <div className="consent-form__signature-actions">
+            <div className={styles.signatureActions}>
               <button type="button" onClick={handleClearSignature}>
                 Clear
               </button>
@@ -151,7 +151,7 @@ export function ConsentFormPage() {
 
           <button
             type="submit"
-            className="consent-form__submit"
+            className={styles.submit}
             disabled={!canSubmit}
             style={{ backgroundColor: canSubmit ? theme.colors.primary : undefined }}
           >

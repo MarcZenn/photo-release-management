@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { searchPhotoReleases, type SearchResultRow } from '../lib/photoReleaseApi'
 import { maskEmail, maskPhone } from '../lib/mask'
-import './SearchDashboardPage.css'
+import styles from './SearchDashboardPage.module.css'
 
 type SearchStatus = 'idle' | 'loading' | 'done'
 
@@ -26,10 +26,10 @@ export function SearchDashboardPage() {
   }
 
   return (
-    <main className="search-dashboard">
+    <main className={styles.searchDashboard}>
       <h1>Search Records</h1>
 
-      <form onSubmit={handleSearch} className="search-dashboard__form">
+      <form onSubmit={handleSearch} className={styles.form}>
         <div>
           <label htmlFor="search-query">Name, email, or phone</label>
           <input id="search-query" type="text" value={query} onChange={(event) => setQuery(event.target.value)} />
@@ -39,26 +39,24 @@ export function SearchDashboardPage() {
         </button>
       </form>
 
-      {status === 'idle' && (
-        <p className="search-dashboard__hint">Enter a name, email, or phone number to search.</p>
-      )}
+      {status === 'idle' && <p className={styles.hint}>Enter a name, email, or phone number to search.</p>}
 
       {status === 'loading' && <p role="status">Searching…</p>}
 
       {status === 'done' && results.length === 0 && (
-        <p className="search-dashboard__empty">No records found for &quot;{query}&quot;.</p>
+        <p className={styles.empty}>No records found for &quot;{query}&quot;.</p>
       )}
 
       {status === 'done' && results.length > 0 && (
-        <ul className="search-dashboard__results">
+        <ul className={styles.results}>
           {results.map((row) => (
             <li key={row.id}>
               <button type="button" onClick={() => navigate(`/dashboard/records/${row.id}`)}>
-                <span className="search-dashboard__name">{row.fullName}</span>
-                <span className="search-dashboard__contact">
+                <span className={styles.name}>{row.fullName}</span>
+                <span className={styles.contact}>
                   {maskPhone(row.phone)} · {maskEmail(row.email)}
                 </span>
-                <span className="search-dashboard__date">{new Date(row.submittedAt).toLocaleDateString()}</span>
+                <span className={styles.date}>{new Date(row.submittedAt).toLocaleDateString()}</span>
               </button>
             </li>
           ))}
