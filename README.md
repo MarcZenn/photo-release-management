@@ -30,7 +30,7 @@ section) — it needs both the server-side vars (used by tooling) and the
 From the repo root:
 
 ```bash
-supabase start
+npm run supabase:start
 ```
 
 This pulls/starts the local stack and prints a table of URLs and keys.
@@ -41,7 +41,20 @@ Docker Desktop must be running first. Local ports (from `supabase/config.toml`):
 | API (PostgREST/Auth) | `54321` | `SUPABASE_URL` / `VITE_SUPABASE_URL` |
 | Postgres | `54322` | direct DB connection (used by `db:seed`) |
 | Studio | `54323` | local Supabase dashboard — browse tables, run SQL |
-| Inbucket (email testing) | `54324` | catches magic-link/OTP emails sent locally — see below |
+| Email testing | `54324` | catches magic-link/OTP emails sent locally — see below |
+
+**Changed anything in `supabase/config.toml`?** `supabase db reset` only resets
+the database — it does **not** pick up config changes (auth settings, ports,
+etc.), since those are read by the other containers (Auth/GoTrue, Studio, …)
+only at their own startup. After editing `config.toml`, do a full restart
+instead:
+
+```bash
+npm run supabase:restart
+```
+
+(Confirmed the hard way: a `site_url` fix sat unused through several
+`db reset`s until an actual restart picked it up.)
 
 Copy the `API URL` and `anon key` from the `supabase start` output (or
 `supabase status` if it's already running) into `.env.local`:
@@ -79,9 +92,13 @@ npm run db:seed
 ### Testing magic-link sign-in locally
 
 There's no real SMTP configured for local dev — magic-link/OTP emails sent
-by `supabase.auth.signInWithOtp()` land in **Inbucket** instead of a real
-inbox. Open **http://127.0.0.1:54324**, find the message addressed to the
-email you signed in with, and click the link.
+by `supabase.auth.signInWithOtp()` land in a local mail catcher instead of a
+real inbox (still configured under `[inbucket]` in `config.toml` for
+historical reasons, but the current Supabase CLI actually runs
+[Mailpit](https://mailpit.axllent.org/) under that setting — same port, a
+different UI/API than the name suggests). Open **http://127.0.0.1:54324**,
+find the message addressed to the email you signed in with, and click the
+link.
 
 Only emails on `staff_allowlist` with `status = 'active'` (the two seeded
 above, or anyone you grant via `update_staff_allowlist`) will get a usable
@@ -114,6 +131,13 @@ as-is to Vercel (or `npm run preview` to smoke-test the build locally).
 ## Common Supabase workflows
 
 ```bash
+# Start the local stack
+npm run supabase:start
+
+# Full restart — required after any supabase/config.toml change, since
+# `db reset` alone won't pick those up (see above)
+npm run supabase:restart
+
 # Create a new migration file
 supabase migration new <description>
 

@@ -1,10 +1,10 @@
-import { useMemo, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ThemedHeader } from '../components/ThemedHeader'
 import { SignaturePad, type SignaturePadHandle } from '../components/SignaturePad'
 import { useTheme } from '../theme/ThemeProvider'
 import { isValidEmail, isValidPhone } from '../lib/validators'
-import { legalNoticeText, legalNoticeVersionLabel } from '../content/legalNotice'
+import { getConsentTokenStatus } from '../lib/consentApi'
 import styles from './ConsentFormPage.module.css'
 
 interface TouchedFields {
@@ -12,6 +12,8 @@ interface TouchedFields {
   phone: boolean
   email: boolean
 }
+
+type LoadStatus = 'loading' | 'invalid' | 'valid'
 
 // Public, unauthenticated. Route: /consent/:token. Submit navigates straight
 // to the confirmation screen for now — I2 wires the actual
@@ -22,6 +24,10 @@ export function ConsentFormPage() {
   const theme = useTheme()
   const navigate = useNavigate()
 
+  const [loadStatus, setLoadStatus] = useState<LoadStatus>('loading')
+  const [noticeText, setNoticeText] = useState('')
+  const [noticeSourceReference, setNoticeSourceReference] = useState('')
+
   const [fullName, setFullName] = useState('')
   const [phone, setPhone] = useState('')
   const [email, setEmail] = useState('')
@@ -31,6 +37,33 @@ export function ConsentFormPage() {
   const [touched, setTouched] = useState<TouchedFields>({ fullName: false, phone: false, email: false })
 
   const signaturePadRef = useRef<SignaturePadHandle>(null)
+
+  useEffect(() => {
+    if (!token) {
+      setLoadStatus('invalid')
+      return
+    }
+
+    let cancelled = false
+    getConsentTokenStatus(token)
+      .then((status) => {
+        if (cancelled) return
+        if (!status.valid || !status.legalNoticeText) {
+          setLoadStatus('invalid')
+          return
+        }
+        setNoticeText(status.legalNoticeText)
+        setNoticeSourceReference(status.legalNoticeSourceReference ?? '')
+        setLoadStatus('valid')
+      })
+      .catch(() => {
+        if (!cancelled) setLoadStatus('invalid')
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [token])
 
   const fullNameValid = fullName.trim().length > 0
   const phoneValid = isValidPhone(phone)
@@ -55,6 +88,30 @@ export function ConsentFormPage() {
     navigate('/consent/confirmation')
   }
 
+  if (loadStatus === 'loading') {
+    return (
+      <>
+        <ThemedHeader />
+        <main className={styles.consentForm}>
+          <p role="status">Loading…</p>
+        </main>
+      </>
+    )
+  }
+
+  if (loadStatus === 'invalid') {
+    return (
+      <>
+        <ThemedHeader />
+        <main className={styles.consentForm}>
+          <p role="alert">
+            This link is no longer valid. Please ask MSU Denver staff to generate a new QR code.
+          </p>
+        </main>
+      </>
+    )
+  }
+
   return (
     <>
       <ThemedHeader />
@@ -63,8 +120,8 @@ export function ConsentFormPage() {
           <input type="hidden" value={token ?? ''} readOnly />
 
           <div className={styles.notice} aria-label="Legal notice">
-            {legalNoticeText}
-            <div className={styles.noticeVersion}>Notice version: {legalNoticeVersionLabel}</div>
+            {noticeText}
+            <div className={styles.noticeVersion}>Source: {noticeSourceReference}</div>
           </div>
 
           <label className={styles.checkbox}>
