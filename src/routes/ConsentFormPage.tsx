@@ -4,7 +4,7 @@ import { ThemedHeader } from '../components/ThemedHeader'
 import { SignaturePad, type SignaturePadHandle } from '../components/SignaturePad'
 import { useTheme } from '../theme/ThemeProvider'
 import { isValidEmail, isValidPhone } from '../lib/validators'
-import { getConsentTokenStatus } from '../lib/consentApi'
+import { createPhotoRelease, getConsentTokenStatus, isInvalidTokenError } from '../lib/consentApi'
 import styles from './ConsentFormPage.module.css'
 
 interface TouchedFields {
@@ -14,11 +14,10 @@ interface TouchedFields {
 }
 
 type LoadStatus = 'loading' | 'invalid' | 'valid'
+type SubmitStatus = 'idle' | 'submitting' | 'error'
 
-// Public, unauthenticated. Route: /consent/:token. Submit navigates straight
-// to the confirmation screen for now — I2 wires the actual
-// create_photo_release call in before that navigation (server independently
-// re-validates everything per FR6 regardless of this client-side gating).
+// Public, unauthenticated. Route: /consent/:token. Server independently
+// re-validates everything per FR6 regardless of this client-side gating.
 export function ConsentFormPage() {
   const { token } = useParams<{ token: string }>()
   const theme = useTheme()
@@ -36,7 +35,15 @@ export function ConsentFormPage() {
   const [hasSignature, setHasSignature] = useState(false)
   const [touched, setTouched] = useState<TouchedFields>({ fullName: false, phone: false, email: false })
 
+  const [submitStatus, setSubmitStatus] = useState<SubmitStatus>('idle')
+  const [submitError, setSubmitError] = useState<string | null>(null)
+
   const signaturePadRef = useRef<SignaturePadHandle>(null)
+  // React state updates aren't synchronous — two clicks dispatched in the
+  // same tick (a real risk from scripted/automated resubmission, not just a
+  // human double-tap) can both read `submitStatus` before either commit sees
+  // 'submitting'. A ref closes that gap because it updates immediately.
+  const isSubmittingRef = useRef(false)
 
   useEffect(() => {
     if (!token) {
@@ -79,13 +86,40 @@ export function ConsentFormPage() {
     setHasSignature(false)
   }
 
-  function handleSubmit(event: FormEvent) {
+  async function handleSubmit(event: FormEvent) {
     event.preventDefault()
-    if (!canSubmit) return
-    // Stubbed success path. I2 replaces this with a real
-    // create_photo_release(consent_token, ...) call, keeping this same
-    // navigation on success and surfacing 400/401 errors inline otherwise.
-    navigate('/consent/confirmation')
+    // The ref check (not just canSubmit/submitStatus) is the double-tap/
+    // double-dispatch guard — the backend itself now happily accepts a
+    // second real submission on the same token (see I1's multi-submission
+    // revision), so this has to be a client-side concern. It has to be a
+    // ref, not just state: two clicks dispatched before React re-renders
+    // would both see the same stale `submitStatus` value otherwise.
+    if (!canSubmit || !token || isSubmittingRef.current) return
+    isSubmittingRef.current = true
+
+    setSubmitStatus('submitting')
+    setSubmitError(null)
+
+    try {
+      await createPhotoRelease({
+        consentToken: token,
+        fullName,
+        phone,
+        email,
+        signatureImage: signaturePadRef.current?.toDataUrl() ?? '',
+        ageAttested,
+        noticeAcknowledged,
+      })
+      navigate('/consent/confirmation')
+    } catch (err) {
+      isSubmittingRef.current = false
+      if (isInvalidTokenError(err)) {
+        setLoadStatus('invalid')
+        return
+      }
+      setSubmitStatus('error')
+      setSubmitError('Something went wrong submitting your release. Please check your entries and try again.')
+    }
   }
 
   if (loadStatus === 'loading') {
@@ -206,13 +240,19 @@ export function ConsentFormPage() {
             </div>
           </div>
 
+          {submitError && (
+            <p className={styles.error} role="alert">
+              {submitError}
+            </p>
+          )}
+
           <button
             type="submit"
             className={styles.submit}
-            disabled={!canSubmit}
+            disabled={!canSubmit || submitStatus === 'submitting'}
             style={{ backgroundColor: canSubmit ? theme.colors.primary : undefined }}
           >
-            Submit
+            {submitStatus === 'submitting' ? 'Submitting…' : 'Submit'}
           </button>
         </form>
       </main>
