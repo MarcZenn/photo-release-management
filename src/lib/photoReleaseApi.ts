@@ -1,3 +1,5 @@
+import { supabase } from './supabaseClient'
+
 export interface SearchResultRow {
   id: string
   fullName: string
@@ -13,59 +15,56 @@ export interface PhotoReleaseDetail {
   email: string
   signatureImage: string // full data: URI, as produced by SignaturePad.toDataUrl() and stored as-is by create_photo_release
   submittedAt: string
-  legalNoticeVersion: string
+  legalNoticeVersion: string // raw legal_notice_versions.version_id — matches the TDD's record_detail field, not resolved to notice text/source_reference here
 }
 
-// A minimal 1x1 transparent PNG, standing in for a real captured signature.
-const MOCK_SIGNATURE_DATA_URL =
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII='
+// get_photo_release returns jsonb built via row_to_json (not
+// jsonb_build_object like the other RPCs), so its keys are the actual
+// snake_case column names, not camelCase.
+interface SearchResultRowFromApi {
+  id: string
+  full_name: string
+  phone: string
+  email: string
+  submitted_at: string
+}
 
-// Stub for F7 — returns mock rows after a simulated delay (so the loading
-// state is exercisable), with "noresults" as a deterministic hook to test
-// the empty-state. I3 replaces this with a real get_photo_release(query)
-// call via the Supabase client.
+interface PhotoReleaseDetailFromApi extends SearchResultRowFromApi {
+  signature_image: string
+  legal_notice_version: string
+}
+
+// Staff-authenticated. Every call writes exactly one audit_log row
+// server-side (RECORD_SEARCH here, RECORD_VIEW in getPhotoReleaseById) —
+// see B11.
 export async function searchPhotoReleases(query: string): Promise<SearchResultRow[]> {
-  await new Promise((resolve) => setTimeout(resolve, 300))
+  const { data, error } = await supabase.rpc('get_photo_release', { query })
+  if (error) throw error
 
-  if (query.trim().toLowerCase() === 'noresults') {
-    return []
-  }
-
-  return [
-    {
-      id: 'mock-1',
-      fullName: 'Jane Participant',
-      phone: '3035550100',
-      email: 'jane@example.com',
-      submittedAt: '2026-08-01T12:00:00Z',
-    },
-    {
-      id: 'mock-2',
-      fullName: 'John Sample',
-      phone: '7205550199',
-      email: 'john@example.com',
-      submittedAt: '2026-08-10T09:30:00Z',
-    },
-  ]
+  return (data as SearchResultRowFromApi[]).map((row) => ({
+    id: row.id,
+    fullName: row.full_name,
+    phone: row.phone,
+    email: row.email,
+    submittedAt: row.submitted_at,
+  }))
 }
 
-// Stub for F8 — returns null for a "not-found" id so that state is
-// exercisable too. I3 replaces this with a real get_photo_release(releaseId)
-// call via the Supabase client.
 export async function getPhotoReleaseById(id: string): Promise<PhotoReleaseDetail | null> {
-  await new Promise((resolve) => setTimeout(resolve, 300))
+  const { data, error } = await supabase.rpc('get_photo_release', { release_id: id })
+  if (error) throw error
 
-  if (id === 'not-found') {
-    return null
-  }
+  const rows = data as PhotoReleaseDetailFromApi[]
+  const row = rows[0]
+  if (!row) return null
 
   return {
-    id,
-    fullName: 'Jane Participant',
-    phone: '3035550100',
-    email: 'jane@example.com',
-    signatureImage: MOCK_SIGNATURE_DATA_URL,
-    submittedAt: '2026-08-01T12:00:00Z',
-    legalNoticeVersion: 'Draft — pending UCM confirmation (see U4)',
+    id: row.id,
+    fullName: row.full_name,
+    phone: row.phone,
+    email: row.email,
+    signatureImage: row.signature_image,
+    submittedAt: row.submitted_at,
+    legalNoticeVersion: row.legal_notice_version,
   }
 }

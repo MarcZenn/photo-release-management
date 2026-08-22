@@ -2,25 +2,33 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { getPhotoReleaseById, type PhotoReleaseDetail } from '../lib/photoReleaseApi'
 
-type LoadStatus = 'loading' | 'found' | 'not-found'
+type LoadStatus = 'loading' | 'found' | 'not-found' | 'error'
 
-// Reachable from search_dashboard result rows (F7). getPhotoReleaseById is a
-// stub — I3 wires it to the real get_photo_release(releaseId) RPC.
+// Reachable from search_dashboard result rows (F7). Wired to the real
+// get_photo_release(releaseId) RPC (I3) — every view writes one RECORD_VIEW
+// audit_log row server-side.
 export function RecordDetailPage() {
   const { id } = useParams<{ id: string }>()
   const [status, setStatus] = useState<LoadStatus>('loading')
   const [record, setRecord] = useState<PhotoReleaseDetail | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!id) return
 
     let cancelled = false
     setStatus('loading')
-    getPhotoReleaseById(id).then((result) => {
-      if (cancelled) return
-      setRecord(result)
-      setStatus(result ? 'found' : 'not-found')
-    })
+    getPhotoReleaseById(id)
+      .then((result) => {
+        if (cancelled) return
+        setRecord(result)
+        setStatus(result ? 'found' : 'not-found')
+      })
+      .catch((err) => {
+        if (cancelled) return
+        setError(err instanceof Error ? err.message : 'Failed to load this record.')
+        setStatus('error')
+      })
 
     return () => {
       cancelled = true
@@ -31,6 +39,14 @@ export function RecordDetailPage() {
     return (
       <main>
         <p role="status">Loading…</p>
+      </main>
+    )
+  }
+
+  if (status === 'error') {
+    return (
+      <main>
+        <p role="alert">{error}</p>
       </main>
     )
   }

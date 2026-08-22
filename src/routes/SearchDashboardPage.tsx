@@ -4,15 +4,16 @@ import { searchPhotoReleases, type SearchResultRow } from '../lib/photoReleaseAp
 import { maskEmail, maskPhone } from '../lib/mask'
 import styles from './SearchDashboardPage.module.css'
 
-type SearchStatus = 'idle' | 'loading' | 'done'
+type SearchStatus = 'idle' | 'loading' | 'done' | 'error'
 
-// Index route under DashboardLayout. searchPhotoReleases is a stub — I3
-// wires it to the real get_photo_release RPC.
+// Index route under DashboardLayout. Wired to the real get_photo_release
+// RPC (I3) — every search writes one RECORD_SEARCH audit_log row server-side.
 export function SearchDashboardPage() {
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState<SearchStatus>('idle')
   const [results, setResults] = useState<SearchResultRow[]>([])
+  const [error, setError] = useState<string | null>(null)
 
   async function handleSearch(event: FormEvent) {
     event.preventDefault()
@@ -20,9 +21,15 @@ export function SearchDashboardPage() {
     if (!trimmed) return
 
     setStatus('loading')
-    const rows = await searchPhotoReleases(trimmed)
-    setResults(rows)
-    setStatus('done')
+    setError(null)
+    try {
+      const rows = await searchPhotoReleases(trimmed)
+      setResults(rows)
+      setStatus('done')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Search failed. Please try again.')
+      setStatus('error')
+    }
   }
 
   return (
@@ -42,6 +49,12 @@ export function SearchDashboardPage() {
       {status === 'idle' && <p className={styles.hint}>Enter a name, email, or phone number to search.</p>}
 
       {status === 'loading' && <p role="status">Searching…</p>}
+
+      {status === 'error' && (
+        <p className={styles.empty} role="alert">
+          {error}
+        </p>
+      )}
 
       {status === 'done' && results.length === 0 && (
         <p className={styles.empty}>No records found for &quot;{query}&quot;.</p>
