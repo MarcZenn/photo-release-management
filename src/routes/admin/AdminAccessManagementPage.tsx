@@ -16,10 +16,11 @@ function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : 'Action failed.'
 }
 
-// Admin-only, reachable only through AdminRouteGuard. Backed by a stub —
-// I4 wires it to the real update_staff_allowlist / list_staff_allowlist RPCs.
+// Admin-only, reachable only through AdminRouteGuard. Wired to the real
+// update_staff_allowlist / list_staff_allowlist RPCs (I4).
 export function AdminAccessManagementPage() {
   const [rows, setRows] = useState<StaffAllowlistRow[] | null>(null)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [pending, setPending] = useState<PendingAction>(null)
   const [rowErrors, setRowErrors] = useState<Record<string, string>>({})
   const [busyEmail, setBusyEmail] = useState<string | null>(null)
@@ -30,7 +31,9 @@ export function AdminAccessManagementPage() {
   const [addBusy, setAddBusy] = useState(false)
 
   useEffect(() => {
-    listStaffAllowlist().then(setRows)
+    listStaffAllowlist()
+      .then(setRows)
+      .catch((err) => setLoadError(errorMessage(err)))
   }, [])
 
   async function refresh() {
@@ -112,6 +115,14 @@ export function AdminAccessManagementPage() {
     } finally {
       setBusyEmail(null)
     }
+  }
+
+  if (loadError) {
+    return (
+      <main className={styles.accessManagement}>
+        <p role="alert">{loadError}</p>
+      </main>
+    )
   }
 
   if (!rows) {

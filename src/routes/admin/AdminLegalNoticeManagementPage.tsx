@@ -18,10 +18,11 @@ function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : 'Failed to add legal notice version.'
 }
 
-// Admin-only, reachable only through AdminRouteGuard. Backed by a stub —
-// I5 wires it to the real add_legal_notice_version / list_legal_notice_versions RPCs.
+// Admin-only, reachable only through AdminRouteGuard. Wired to the real
+// add_legal_notice_version / list_legal_notice_versions RPCs (I5).
 export function AdminLegalNoticeManagementPage() {
   const [versions, setVersions] = useState<LegalNoticeVersionRow[] | null>(null)
+  const [loadError, setLoadError] = useState<string | null>(null)
 
   const [noticeText, setNoticeText] = useState('')
   const [sourceReference, setSourceReference] = useState('')
@@ -32,7 +33,9 @@ export function AdminLegalNoticeManagementPage() {
   const [submitBusy, setSubmitBusy] = useState(false)
 
   useEffect(() => {
-    listLegalNoticeVersions().then(setVersions)
+    listLegalNoticeVersions()
+      .then(setVersions)
+      .catch((err) => setLoadError(errorMessage(err)))
   }, [])
 
   const currentVersion = useMemo(() => {
@@ -80,6 +83,14 @@ export function AdminLegalNoticeManagementPage() {
     } finally {
       setSubmitBusy(false)
     }
+  }
+
+  if (loadError) {
+    return (
+      <main className={styles.main}>
+        <p role="alert">{loadError}</p>
+      </main>
+    )
   }
 
   if (!versions) {
