@@ -18,8 +18,9 @@ function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : 'Failed to load audit log.'
 }
 
-// Admin-only, reachable only through AdminRouteGuard. Backed by a stub —
-// I6 wires it to the real list_audit_log RPC.
+// Admin-only, reachable only through AdminRouteGuard. Wired to the real
+// list_audit_log RPC (I6). Actor/target filters are exact matches, not
+// substring search — see auditLogApi.ts.
 export function AdminAuditLogPage() {
   const [filters, setFilters] = useState<Filters>(emptyFilters)
   const [pageOffset, setPageOffset] = useState(0)

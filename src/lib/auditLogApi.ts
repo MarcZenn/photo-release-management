@@ -1,3 +1,5 @@
+import { supabase } from './supabaseClient'
+
 export type AuditLogAction =
   | 'GRANT_ACCESS'
   | 'REVOKE_ACCESS'
@@ -36,75 +38,66 @@ export interface AuditLogPage {
   totalCount: number
 }
 
-const ACTORS = ['aschweng@msudenver.edu', 'marcusareulius@gmail.com', 'staffer@msudenver.edu']
-
-function buildMockRows(): AuditLogRow[] {
-  const rows: AuditLogRow[] = []
-  const now = Date.now()
-
-  for (let i = 0; i < 120; i++) {
-    const action = AUDIT_LOG_ACTIONS[i % AUDIT_LOG_ACTIONS.length]
-    const actorEmail = ACTORS[i % ACTORS.length]
-    const targetId =
-      action === 'GRANT_ACCESS' || action === 'REVOKE_ACCESS'
-        ? 'target-staffer@msudenver.edu'
-        : action === 'RECORD_VIEW'
-          ? `release-${i}`
-          : null
-
-    rows.push({
-      id: `audit-${i}`,
-      actorEmail,
-      action,
-      targetId,
-      createdAt: new Date(now - i * 1000 * 60 * 37).toISOString(), // spread ~37min apart
-    })
-  }
-
-  return rows
+// list_audit_log's outer wrapper is jsonb_build_object('rows', ...,
+// 'totalCount', ...) — camelCase — but each row inside `rows` is built via
+// row_to_json against audit_log's own columns, so those are snake_case.
+interface AuditLogRowFromApi {
+  id: string
+  actor_email: string
+  action: AuditLogAction
+  target_id: string | null
+  metadata: unknown
+  created_at: string
 }
 
-const allRows = buildMockRows()
-
-function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms))
+interface AuditLogPageFromApi {
+  rows: AuditLogRowFromApi[]
+  totalCount: number
 }
 
-// Stub for F11, mirroring B14's list_audit_log contract (filters +
-// limit/offset pagination, {rows, totalCount}), including its date-range
-// validation. I6 replaces this with the real RPC call.
+function isInvalidDateRangeError(err: unknown): boolean {
+  return (
+    typeof err === 'object' &&
+    err !== null &&
+    'message' in err &&
+    (err as { message: unknown }).message === 'invalid_date_range'
+  )
+}
+
+// Admin-only, authenticated. Note: actor/target filters are EXACT matches
+// server-side (unlike the fuzzy/partial search on get_photo_release) — the
+// text inputs here don't do substring matching, matching B14 as written.
 export async function listAuditLog(
   filters: AuditLogFilters,
   pageLimit: number,
   pageOffset: number,
 ): Promise<AuditLogPage> {
-  await delay(200)
-
-  if (filters.dateFrom && filters.dateTo && new Date(filters.dateFrom) > new Date(filters.dateTo)) {
-    throw new Error('date_from must not be after date_to.')
-  }
-
-  const filtered = allRows.filter((row) => {
-    if (filters.actorEmail && !row.actorEmail.toLowerCase().includes(filters.actorEmail.toLowerCase())) {
-      return false
-    }
-    if (filters.action && row.action !== filters.action) {
-      return false
-    }
-    if (filters.targetId && !(row.targetId ?? '').toLowerCase().includes(filters.targetId.toLowerCase())) {
-      return false
-    }
-    if (filters.dateFrom && new Date(row.createdAt) < new Date(filters.dateFrom)) {
-      return false
-    }
-    if (filters.dateTo && new Date(row.createdAt) > new Date(filters.dateTo)) {
-      return false
-    }
-    return true
+  const { data, error } = await supabase.rpc('list_audit_log', {
+    actor_email: filters.actorEmail || null,
+    action: filters.action || null,
+    target_id: filters.targetId || null,
+    date_from: filters.dateFrom || null,
+    date_to: filters.dateTo || null,
+    page_limit: pageLimit,
+    page_offset: pageOffset,
   })
 
+  if (error) {
+    if (isInvalidDateRangeError(error)) {
+      throw new Error('Invalid date range — "From" must not be after "To".')
+    }
+    throw error
+  }
+
+  const page = data as AuditLogPageFromApi
   return {
-    rows: filtered.slice(pageOffset, pageOffset + pageLimit),
-    totalCount: filtered.length,
+    rows: page.rows.map((row) => ({
+      id: row.id,
+      actorEmail: row.actor_email,
+      action: row.action,
+      targetId: row.target_id,
+      createdAt: row.created_at,
+    })),
+    totalCount: page.totalCount,
   }
 }
