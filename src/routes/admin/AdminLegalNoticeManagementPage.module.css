@@ -15,6 +15,9 @@
 }
 
 .currentVersion {
+  border: 1px solid var(--md-divider);
+  border-radius: var(--md-radius-lg);
+  padding: 5rem;
   white-space: pre-wrap;
 }
 
