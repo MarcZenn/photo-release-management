@@ -2,6 +2,9 @@ import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { searchPhotoReleases, type SearchResultRow } from '../lib/photoReleaseApi'
 import { maskEmail, maskPhone } from '../lib/mask'
+import { TextField } from '../components/ui/TextField'
+import { Button } from '../components/ui/Button'
+import { Alert } from '../components/ui/Alert'
 import styles from './SearchDashboardPage.module.css'
 
 type SearchStatus = 'idle' | 'loading' | 'done' | 'error'
@@ -33,28 +36,27 @@ export function SearchDashboardPage() {
   }
 
   return (
-    <main className={styles.searchDashboard}>
-      <h1>Search Records</h1>
+    <main>
+      <h1 className={styles.title}>Search Records</h1>
 
       <form onSubmit={handleSearch} className={styles.form}>
-        <div>
-          <label htmlFor="search-query">Name, email, or phone</label>
-          <input id="search-query" type="text" value={query} onChange={(event) => setQuery(event.target.value)} />
-        </div>
-        <button type="submit" disabled={!query.trim() || status === 'loading'}>
+        <TextField
+          id="search-query"
+          label="Name, email, or phone"
+          type="text"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+        />
+        <Button type="submit" disabled={!query.trim() || status === 'loading'}>
           Search
-        </button>
+        </Button>
       </form>
 
       {status === 'idle' && <p className={styles.hint}>Enter a name, email, or phone number to search.</p>}
 
       {status === 'loading' && <p role="status">Searching…</p>}
 
-      {status === 'error' && (
-        <p className={styles.empty} role="alert">
-          {error}
-        </p>
-      )}
+      {status === 'error' && <Alert severity="error">{error}</Alert>}
 
       {status === 'done' && results.length === 0 && (
         <p className={styles.empty}>No records found for &quot;{query}&quot;.</p>

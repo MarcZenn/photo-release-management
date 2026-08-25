@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react'
 import { listAuditLog, AUDIT_LOG_ACTIONS, type AuditLogAction, type AuditLogRow } from '../../lib/auditLogApi'
+import { TextField } from '../../components/ui/TextField'
+import { Select } from '../../components/ui/Select'
+import { Button } from '../../components/ui/Button'
+import { Alert } from '../../components/ui/Alert'
+import { Table } from '../../components/ui/Table'
 import styles from './AdminAuditLogPage.module.css'
 
 const PAGE_LIMIT = 50
@@ -69,69 +74,59 @@ export function AdminAuditLogPage() {
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_LIMIT))
 
   return (
-    <main className={styles.main}>
-      <h1>Audit Log</h1>
+    <main>
+      <h1 className={styles.title}>Audit Log</h1>
 
       <div className={styles.filters}>
-        <div>
-          <label htmlFor="filter-actor">Actor</label>
-          <input
-            id="filter-actor"
-            type="text"
-            value={filters.actorEmail}
-            onChange={(event) => updateFilter('actorEmail', event.target.value)}
-          />
-        </div>
-        <div>
-          <label htmlFor="filter-action">Action</label>
-          <select
-            id="filter-action"
-            value={filters.action}
-            onChange={(event) => updateFilter('action', event.target.value as AuditLogAction | '')}
-          >
-            <option value="">All</option>
-            {AUDIT_LOG_ACTIONS.map((action) => (
-              <option key={action} value={action}>
-                {action}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label htmlFor="filter-target">Target</label>
-          <input
-            id="filter-target"
-            type="text"
-            value={filters.targetId}
-            onChange={(event) => updateFilter('targetId', event.target.value)}
-          />
-        </div>
-        <div>
-          <label htmlFor="filter-date-from">From</label>
-          <input
-            id="filter-date-from"
-            type="datetime-local"
-            value={filters.dateFrom}
-            onChange={(event) => updateFilter('dateFrom', event.target.value)}
-          />
-        </div>
-        <div>
-          <label htmlFor="filter-date-to">To</label>
-          <input
-            id="filter-date-to"
-            type="datetime-local"
-            value={filters.dateTo}
-            onChange={(event) => updateFilter('dateTo', event.target.value)}
-          />
-        </div>
+        <TextField
+          id="filter-actor"
+          label="Actor"
+          type="text"
+          value={filters.actorEmail}
+          onChange={(event) => updateFilter('actorEmail', event.target.value)}
+        />
+        <Select
+          id="filter-action"
+          label="Action"
+          value={filters.action}
+          onChange={(event) => updateFilter('action', event.target.value as AuditLogAction | '')}
+        >
+          <option value="">All</option>
+          {AUDIT_LOG_ACTIONS.map((action) => (
+            <option key={action} value={action}>
+              {action}
+            </option>
+          ))}
+        </Select>
+        <TextField
+          id="filter-target"
+          label="Target"
+          type="text"
+          value={filters.targetId}
+          onChange={(event) => updateFilter('targetId', event.target.value)}
+        />
+        <TextField
+          id="filter-date-from"
+          label="From"
+          type="datetime-local"
+          value={filters.dateFrom}
+          onChange={(event) => updateFilter('dateFrom', event.target.value)}
+        />
+        <TextField
+          id="filter-date-to"
+          label="To"
+          type="datetime-local"
+          value={filters.dateTo}
+          onChange={(event) => updateFilter('dateTo', event.target.value)}
+        />
       </div>
 
-      {error && <p className={styles.error}>{error}</p>}
+      {error && <Alert severity="error">{error}</Alert>}
 
       {rows === null ? (
         <p role="status">Loading…</p>
       ) : (
-        <table className={styles.table}>
+        <Table>
           <thead>
             <tr>
               <th>Actor</th>
@@ -150,27 +145,29 @@ export function AdminAuditLogPage() {
               </tr>
             ))}
           </tbody>
-        </table>
+        </Table>
       )}
 
       <div className={styles.pagination}>
-        <button
+        <Button
           type="button"
+          variant="outlined"
           onClick={() => setPageOffset((prev) => Math.max(0, prev - PAGE_LIMIT))}
           disabled={pageOffset === 0}
         >
           Previous
-        </button>
+        </Button>
         <span>
           Page {currentPage} of {totalPages} ({totalCount} total)
         </span>
-        <button
+        <Button
           type="button"
+          variant="outlined"
           onClick={() => setPageOffset((prev) => prev + PAGE_LIMIT)}
           disabled={pageOffset + PAGE_LIMIT >= totalCount}
         >
           Next
-        </button>
+        </Button>
       </div>
     </main>
   )

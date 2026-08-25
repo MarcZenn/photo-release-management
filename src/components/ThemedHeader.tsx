@@ -14,10 +14,13 @@ export function ThemedHeader() {
         padding: '0.75rem 1rem',
         backgroundColor: theme.colors.primary,
         color: '#fff',
+        boxShadow: 'var(--md-shadow-2)',
+        position: 'relative',
+        zIndex: 1,
       }}
     >
-      <img src={theme.logoUrl} alt={`${theme.legalEntityName} logo`} height={32} width={32} />
-      <span style={{ fontWeight: 600, fontSize: '1.125rem' }}>{theme.appName}</span>
+      <img src={theme.logoUrl} alt={`${theme.legalEntityName} logo`} style={{ height: 32, width: 'auto' }} />
+      <span style={{ fontWeight: 500, fontSize: '1.125rem' }}>{theme.appName}</span>
     </header>
   )
 }

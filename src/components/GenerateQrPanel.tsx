@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
 import { generateConsentToken } from '../lib/consentApi'
+import { Card } from './ui/Card'
+import { Button } from './ui/Button'
+import { Alert } from './ui/Alert'
 import styles from './GenerateQrPanel.module.css'
 
 function formatCountdown(msRemaining: number): string {
@@ -51,26 +54,32 @@ export function GenerateQrPanel() {
   const isExpired = msRemaining !== null && msRemaining <= 0
 
   return (
-    <div className={styles.panel}>
-      <button type="button" onClick={handleGenerate} disabled={busy}>
+    <Card className={styles.panel}>
+      <Button type="button" onClick={handleGenerate} disabled={busy}>
         {qrDataUrl ? 'Generate New QR' : 'Generate QR'}
-      </button>
+      </Button>
 
-      {error && (
-        <p className={styles.error} role="alert">
-          {error}
-        </p>
-      )}
+      {error && <Alert severity="error">{error}</Alert>}
 
       {qrDataUrl && consentUrl && (
         <div className={styles.result}>
-          <img src={qrDataUrl} alt="QR code linking to the consent form" width={200} height={200} />
+          <img
+            src={qrDataUrl}
+            alt="QR code linking to the consent form"
+            width={200}
+            height={200}
+            className={styles.qrImage}
+          />
           <p className={styles.url}>{consentUrl}</p>
-          <p className={isExpired ? styles.expired : styles.countdown} role="status">
-            {isExpired ? 'This code has expired — generate a new one.' : `Expires in ${formatCountdown(msRemaining ?? 0)}`}
-          </p>
+          {isExpired ? (
+            <Alert severity="error">This code has expired — generate a new one.</Alert>
+          ) : (
+            <p className={styles.countdown} role="status">
+              Expires in {formatCountdown(msRemaining ?? 0)}
+            </p>
+          )}
         </div>
       )}
-    </div>
+    </Card>
   )
 }

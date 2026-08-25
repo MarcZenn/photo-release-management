@@ -1,0 +1,44 @@
+.title {
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem 2rem;
+  margin: 0;
+}
+
+.fields dt {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--md-text-secondary);
+}
+
+.fields dd {
+  margin: 0.125rem 0 0;
+  font-size: 0.9375rem;
+}
+
+.signatureLabel {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--md-text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.signature {
+  max-width: 100%;
+  border: 1px solid var(--md-divider);
+  border-radius: var(--md-radius);
+}

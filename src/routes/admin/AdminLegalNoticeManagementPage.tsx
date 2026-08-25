@@ -5,6 +5,11 @@ import {
   type LegalNoticeVersionRow,
 } from '../../lib/legalNoticeApi'
 import { toDatetimeLocalValue } from '../../lib/datetimeLocal'
+import { Card } from '../../components/ui/Card'
+import { TextField, TextAreaField } from '../../components/ui/TextField'
+import { Button } from '../../components/ui/Button'
+import { Alert } from '../../components/ui/Alert'
+import { Table } from '../../components/ui/Table'
 import styles from './AdminLegalNoticeManagementPage.module.css'
 
 type FormStage = 'editing' | 'previewing'
@@ -87,39 +92,39 @@ export function AdminLegalNoticeManagementPage() {
 
   if (loadError) {
     return (
-      <main className={styles.main}>
-        <p role="alert">{loadError}</p>
+      <main>
+        <Alert severity="error">{loadError}</Alert>
       </main>
     )
   }
 
   if (!versions) {
     return (
-      <main className={styles.main}>
+      <main>
         <p role="status">Loading…</p>
       </main>
     )
   }
 
   return (
-    <main className={styles.main}>
-      <h1>Legal Notice Management</h1>
+    <main>
+      <h1 className={styles.title}>Legal Notice Management</h1>
 
-      <h2>Current Version</h2>
+      <h2 className={styles.sectionTitle}>Current Version</h2>
       {currentVersion ? (
-        <div className={styles.currentVersion}>
+        <Card className={styles.currentVersion}>
           {currentVersion.noticeText}
           <div className={styles.meta}>
             Effective: {new Date(currentVersion.effectiveAt).toLocaleString()} · Source:{' '}
             {currentVersion.sourceReference}
           </div>
-        </div>
+        </Card>
       ) : (
         <p>No version is currently effective.</p>
       )}
 
-      <h2>Version History</h2>
-      <table className={styles.table}>
+      <h2 className={styles.sectionTitle}>Version History</h2>
+      <Table>
         <thead>
           <tr>
             <th>Effective At</th>
@@ -133,78 +138,74 @@ export function AdminLegalNoticeManagementPage() {
             <tr key={row.versionId}>
               <td>{new Date(row.effectiveAt).toLocaleString()}</td>
               <td>{row.sourceReference}</td>
-              <td title={row.noticeText}>{row.noticeText}</td>
+              <td className={styles.noticeTextCell} title={row.noticeText}>
+                {row.noticeText}
+              </td>
               <td>
                 {row.createdBy} · {new Date(row.createdAt).toLocaleDateString()}
               </td>
             </tr>
           ))}
         </tbody>
-      </table>
+      </Table>
 
-      <h2>Add New Version</h2>
+      <h2 className={styles.sectionTitle}>Add New Version</h2>
 
       {stage === 'editing' && (
-        <form onSubmit={handleReview} noValidate>
-          <div className={styles.field}>
-            <label htmlFor="notice-text">Notice text</label>
-            <textarea
+        <Card>
+          <form onSubmit={handleReview} noValidate className={styles.form}>
+            <TextAreaField
               id="notice-text"
-              className={styles.textarea}
+              label="Notice text"
+              rows={6}
               value={noticeText}
               onChange={(event) => setNoticeText(event.target.value)}
+              error={fieldErrors.noticeText}
             />
-            {fieldErrors.noticeText && <p className={styles.error}>{fieldErrors.noticeText}</p>}
-          </div>
 
-          <div className={styles.field}>
-            <label htmlFor="source-reference">Source reference</label>
-            <input
+            <TextField
               id="source-reference"
+              label="Source reference"
               type="text"
-              className={styles.input}
               value={sourceReference}
               onChange={(event) => setSourceReference(event.target.value)}
               placeholder="e.g. UCM Photo/Video/Statement Release Form, 2023-24 edition, confirmed with [contact] on [date]"
+              error={fieldErrors.sourceReference}
             />
-            {fieldErrors.sourceReference && <p className={styles.error}>{fieldErrors.sourceReference}</p>}
-          </div>
 
-          <div className={styles.field}>
-            <label htmlFor="effective-at">Effective at</label>
-            <input
+            <TextField
               id="effective-at"
+              label="Effective at"
               type="datetime-local"
-              className={styles.input}
               value={effectiveAt}
               min={toDatetimeLocalValue(new Date())}
               onChange={(event) => setEffectiveAt(event.target.value)}
             />
-          </div>
 
-          <button type="submit">Review</button>
-        </form>
+            <Button type="submit">Review</Button>
+          </form>
+        </Card>
       )}
 
       {stage === 'previewing' && (
-        <div>
+        <Card>
           <p>This is exactly what will become the live legal notice:</p>
-          <div className={styles.previewBox}>
+          <Card className={styles.previewBox} style={{ boxShadow: 'none', backgroundColor: 'var(--md-background)' }}>
             {noticeText}
             <div className={styles.meta}>
               Effective: {new Date(effectiveAt).toLocaleString()} · Source: {sourceReference}
             </div>
-          </div>
-          {submitError && <p className={styles.error}>{submitError}</p>}
+          </Card>
+          {submitError && <Alert severity="error">{submitError}</Alert>}
           <div className={styles.previewActions}>
-            <button type="button" onClick={handleConfirmPublish} disabled={submitBusy}>
-              Confirm & Publish
-            </button>
-            <button type="button" onClick={() => setStage('editing')} disabled={submitBusy}>
+            <Button type="button" onClick={handleConfirmPublish} disabled={submitBusy}>
+              Confirm &amp; Publish
+            </Button>
+            <Button type="button" variant="outlined" onClick={() => setStage('editing')} disabled={submitBusy}>
               Edit
-            </button>
+            </Button>
           </div>
-        </div>
+        </Card>
       )}
     </main>
   )

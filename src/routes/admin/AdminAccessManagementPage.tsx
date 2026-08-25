@@ -6,6 +6,11 @@ import {
   type StaffAllowlistRow,
 } from '../../lib/staffAllowlistApi'
 import { isValidEmail } from '../../lib/validators'
+import { TextField } from '../../components/ui/TextField'
+import { Select } from '../../components/ui/Select'
+import { Button } from '../../components/ui/Button'
+import { Alert } from '../../components/ui/Alert'
+import { Table } from '../../components/ui/Table'
 import styles from './AdminAccessManagementPage.module.css'
 
 type Role = 'admin' | 'staff'
@@ -119,53 +124,53 @@ export function AdminAccessManagementPage() {
 
   if (loadError) {
     return (
-      <main className={styles.accessManagement}>
-        <p role="alert">{loadError}</p>
+      <main>
+        <Alert severity="error">{loadError}</Alert>
       </main>
     )
   }
 
   if (!rows) {
     return (
-      <main className={styles.accessManagement}>
+      <main>
         <p role="status">Loading…</p>
       </main>
     )
   }
 
   return (
-    <main className={styles.accessManagement}>
-      <h1>Staff Access Management</h1>
+    <main>
+      <h1 className={styles.title}>Staff Access Management</h1>
 
       <form onSubmit={handleAddStaff} className={styles.addForm}>
-        <div>
-          <label htmlFor="new-staff-email">Email</label>
-          <input
-            id="new-staff-email"
-            type="email"
-            value={newEmail}
-            onChange={(event) => setNewEmail(event.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="new-staff-role">Role</label>
-          <select id="new-staff-role" value={newRole} onChange={(event) => setNewRole(event.target.value as Role)}>
-            <option value="staff">Staff</option>
-            <option value="admin">Admin</option>
-          </select>
-        </div>
-        <button type="submit" disabled={!isValidEmail(newEmail) || addBusy}>
+        <TextField
+          id="new-staff-email"
+          label="Email"
+          type="email"
+          value={newEmail}
+          onChange={(event) => setNewEmail(event.target.value)}
+          required
+        />
+        <Select
+          id="new-staff-role"
+          label="Role"
+          value={newRole}
+          onChange={(event) => setNewRole(event.target.value as Role)}
+        >
+          <option value="staff">Staff</option>
+          <option value="admin">Admin</option>
+        </Select>
+        <Button type="submit" disabled={!isValidEmail(newEmail) || addBusy}>
           Add
-        </button>
+        </Button>
         {addError && (
-          <p className={styles.rowError} role="alert">
-            {addError}
-          </p>
+          <div className={styles.addFormError}>
+            <Alert severity="error">{addError}</Alert>
+          </div>
         )}
       </form>
 
-      <table>
+      <Table>
         <thead>
           <tr>
             <th>Email</th>
@@ -184,8 +189,17 @@ export function AdminAccessManagementPage() {
             return (
               <tr key={row.email}>
                 <td>{row.email}</td>
-                <td>{row.role}</td>
-                <td>{row.status}</td>
+                <td className={styles.roleCell}>{row.role}</td>
+                <td>
+                  <span
+                    className={[
+                      styles.statusChip,
+                      row.status === 'active' ? styles.statusActive : styles.statusRevoked,
+                    ].join(' ')}
+                  >
+                    {row.status}
+                  </span>
+                </td>
                 <td>
                   {row.status === 'active'
                     ? `${row.grantedBy} · ${new Date(row.grantedAt).toLocaleDateString()}`
@@ -194,32 +208,33 @@ export function AdminAccessManagementPage() {
                 <td>
                   {row.status === 'active' ? (
                     isPendingRevoke ? (
-                      <span className={styles.confirm}>
-                        Revoke access for {row.email}?
-                        <span>
-                          <button type="button" onClick={confirmPending} disabled={isBusy}>
+                      <div className={styles.confirm}>
+                        <span>Revoke access for {row.email}?</span>
+                        <span className={styles.confirmActions}>
+                          <Button type="button" color="accent" onClick={confirmPending} disabled={isBusy}>
                             Confirm
-                          </button>{' '}
-                          <button type="button" onClick={() => setPending(null)} disabled={isBusy}>
+                          </Button>
+                          <Button type="button" variant="outlined" onClick={() => setPending(null)} disabled={isBusy}>
                             Cancel
-                          </button>
+                          </Button>
                         </span>
-                      </span>
+                      </div>
                     ) : isPendingDemote ? (
-                      <span className={styles.confirm}>
-                        Change role to Staff for {row.email}? This removes Admin access.
-                        <span>
-                          <button type="button" onClick={confirmPending} disabled={isBusy}>
+                      <div className={styles.confirm}>
+                        <span>Change role to Staff for {row.email}? This removes Admin access.</span>
+                        <span className={styles.confirmActions}>
+                          <Button type="button" color="accent" onClick={confirmPending} disabled={isBusy}>
                             Confirm
-                          </button>{' '}
-                          <button type="button" onClick={() => setPending(null)} disabled={isBusy}>
+                          </Button>
+                          <Button type="button" variant="outlined" onClick={() => setPending(null)} disabled={isBusy}>
                             Cancel
-                          </button>
+                          </Button>
                         </span>
-                      </span>
+                      </div>
                     ) : (
-                      <>
-                        <select
+                      <div className={styles.actions}>
+                        <Select
+                          id={`role-${row.email}`}
                           aria-label={`Role for ${row.email}`}
                           value={row.role}
                           disabled={isBusy}
@@ -227,28 +242,34 @@ export function AdminAccessManagementPage() {
                         >
                           <option value="staff">Staff</option>
                           <option value="admin">Admin</option>
-                        </select>{' '}
-                        <button type="button" onClick={() => setPending({ kind: 'revoke', email: row.email })} disabled={isBusy}>
+                        </Select>
+                        <Button
+                          type="button"
+                          variant="outlined"
+                          color="accent"
+                          onClick={() => setPending({ kind: 'revoke', email: row.email })}
+                          disabled={isBusy}
+                        >
                           Revoke
-                        </button>
-                      </>
+                        </Button>
+                      </div>
                     )
                   ) : (
-                    <button type="button" onClick={() => handleRegrant(row.email)} disabled={isBusy}>
+                    <Button type="button" variant="outlined" onClick={() => handleRegrant(row.email)} disabled={isBusy}>
                       Re-grant
-                    </button>
+                    </Button>
                   )}
                   {rowErrors[row.email] && (
-                    <p className={styles.rowError} role="alert">
-                      {rowErrors[row.email]}
-                    </p>
+                    <div className={styles.rowError}>
+                      <Alert severity="error">{rowErrors[row.email]}</Alert>
+                    </div>
                   )}
                 </td>
               </tr>
             )
           })}
         </tbody>
-      </table>
+      </Table>
     </main>
   )
 }

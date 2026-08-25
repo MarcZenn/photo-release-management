@@ -1,50 +1,62 @@
-.accessManagement {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 1rem;
+.title {
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+  font-weight: 500;
 }
 
 .addForm {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.75rem;
   align-items: flex-end;
   margin-bottom: 1.5rem;
+  flex-wrap: wrap;
 }
 
-.addForm label {
-  display: block;
-  margin-bottom: 0.25rem;
-  font-weight: 600;
+.addFormError {
+  flex-basis: 100%;
 }
 
-.addForm input,
-.addForm select {
-  padding: 0.5rem;
-  border: 1px solid #999;
-  border-radius: 4px;
+.roleCell {
+  text-transform: capitalize;
 }
 
-.accessManagement table {
-  width: 100%;
-  border-collapse: collapse;
+.statusChip {
+  display: inline-block;
+  padding: 0.125rem 0.625rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
 }
 
-.accessManagement th,
-.accessManagement td {
-  text-align: left;
-  padding: 0.5rem;
-  border-bottom: 1px solid #ddd;
-  vertical-align: top;
+.statusActive {
+  background-color: #e6f4ea;
+  color: #1e4620;
 }
 
-.rowError {
-  color: #c8102e;
-  font-size: 0.85rem;
-  margin: 0.25rem 0 0;
+.statusRevoked {
+  background-color: rgba(0, 0, 0, 0.08);
+  color: var(--md-text-secondary);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .confirm {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.5rem;
+}
+
+.confirmActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.rowError {
+  margin-top: 0.5rem;
 }

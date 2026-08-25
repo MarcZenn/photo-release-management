@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { getPhotoReleaseById, type PhotoReleaseDetail } from '../lib/photoReleaseApi'
+import { Card } from '../components/ui/Card'
+import { Alert } from '../components/ui/Alert'
+import styles from './RecordDetailPage.module.css'
 
 type LoadStatus = 'loading' | 'found' | 'not-found' | 'error'
 
@@ -46,7 +49,7 @@ export function RecordDetailPage() {
   if (status === 'error') {
     return (
       <main>
-        <p role="alert">{error}</p>
+        <Alert severity="error">{error}</Alert>
       </main>
     )
   }
@@ -61,27 +64,29 @@ export function RecordDetailPage() {
 
   return (
     <main>
-      <h1>Release Record</h1>
-      <dl>
-        <dt>Name</dt>
-        <dd>{record.fullName}</dd>
-        <dt>Phone</dt>
-        <dd>{record.phone}</dd>
-        <dt>Email</dt>
-        <dd>{record.email}</dd>
-        <dt>Submitted</dt>
-        <dd>{new Date(record.submittedAt).toLocaleString()}</dd>
-        <dt>Legal notice version</dt>
-        <dd>{record.legalNoticeVersion}</dd>
-      </dl>
-      <div>
-        <p>Signature</p>
-        <img
-          src={record.signatureImage}
-          alt={`Signature of ${record.fullName}`}
-          style={{ maxWidth: '100%', border: '1px solid #ccc', borderRadius: 4 }}
-        />
-      </div>
+      <h1 className={styles.title}>Release Record</h1>
+      <Card className={styles.card}>
+        <dl className={styles.fields}>
+          <dt>Name</dt>
+          <dd>{record.fullName}</dd>
+          <dt>Phone</dt>
+          <dd>{record.phone}</dd>
+          <dt>Email</dt>
+          <dd>{record.email}</dd>
+          <dt>Submitted</dt>
+          <dd>{new Date(record.submittedAt).toLocaleString()}</dd>
+          <dt>Legal notice version</dt>
+          <dd>{record.legalNoticeVersion}</dd>
+        </dl>
+        <div>
+          <p className={styles.signatureLabel}>Signature</p>
+          <img
+            src={record.signatureImage}
+            alt={`Signature of ${record.fullName}`}
+            className={styles.signature}
+          />
+        </div>
+      </Card>
     </main>
   )
 }

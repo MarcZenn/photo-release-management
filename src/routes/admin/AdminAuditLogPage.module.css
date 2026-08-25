@@ -1,7 +1,7 @@
-.main {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 1rem;
+.title {
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+  font-weight: 500;
 }
 
 .filters {
@@ -12,41 +12,15 @@
   margin-bottom: 1rem;
 }
 
-.filters label {
-  display: block;
-  margin-bottom: 0.25rem;
-  font-weight: 600;
-}
-
-.filters input,
-.filters select {
-  padding: 0.5rem;
-  border: 1px solid #999;
-  border-radius: 4px;
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 1rem;
-}
-
-.table th,
-.table td {
-  text-align: left;
-  padding: 0.5rem;
-  border-bottom: 1px solid #ddd;
-  vertical-align: top;
-}
-
-.error {
-  color: #c8102e;
-  font-size: 0.85rem;
-  margin: 0.25rem 0 1rem;
+.filters > * {
+  min-width: 160px;
 }
 
 .pagination {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  color: var(--md-text-secondary);
 }

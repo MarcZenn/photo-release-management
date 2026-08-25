@@ -2,7 +2,11 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ThemedHeader } from '../components/ThemedHeader'
 import { SignaturePad, type SignaturePadHandle } from '../components/SignaturePad'
-import { useTheme } from '../theme/ThemeProvider'
+import { Card } from '../components/ui/Card'
+import { TextField } from '../components/ui/TextField'
+import { Checkbox } from '../components/ui/Checkbox'
+import { Button } from '../components/ui/Button'
+import { Alert } from '../components/ui/Alert'
 import { isValidEmail, isValidPhone } from '../lib/validators'
 import { createPhotoRelease, getConsentTokenStatus, isInvalidTokenError } from '../lib/consentApi'
 import styles from './ConsentFormPage.module.css'
@@ -20,7 +24,6 @@ type SubmitStatus = 'idle' | 'submitting' | 'error'
 // re-validates everything per FR6 regardless of this client-side gating.
 export function ConsentFormPage() {
   const { token } = useParams<{ token: string }>()
-  const theme = useTheme()
   const navigate = useNavigate()
 
   const [loadStatus, setLoadStatus] = useState<LoadStatus>('loading')
@@ -126,7 +129,7 @@ export function ConsentFormPage() {
     return (
       <>
         <ThemedHeader />
-        <main className={styles.consentForm}>
+        <main className={styles.main}>
           <p role="status">Loading…</p>
         </main>
       </>
@@ -137,10 +140,10 @@ export function ConsentFormPage() {
     return (
       <>
         <ThemedHeader />
-        <main className={styles.consentForm}>
-          <p role="alert">
+        <main className={styles.main}>
+          <Alert severity="error">
             This link is no longer valid. Please ask MSU Denver staff to generate a new QR code.
-          </p>
+          </Alert>
         </main>
       </>
     )
@@ -149,112 +152,96 @@ export function ConsentFormPage() {
   return (
     <>
       <ThemedHeader />
-      <main className={styles.consentForm}>
-        <form onSubmit={handleSubmit} noValidate>
-          <input type="hidden" value={token ?? ''} readOnly />
+      <main className={styles.main}>
+        <Card>
+          <form onSubmit={handleSubmit} noValidate className={styles.form}>
+            <input type="hidden" value={token ?? ''} readOnly />
 
-          <div className={styles.notice} aria-label="Legal notice">
-            {noticeText}
-            <div className={styles.noticeVersion}>Source: {noticeSourceReference}</div>
-          </div>
+            <div className={styles.notice} aria-label="Legal notice">
+              {noticeText}
+              <div className={styles.noticeVersion}>Source: {noticeSourceReference}</div>
+            </div>
 
-          <label className={styles.checkbox}>
-            <input
-              type="checkbox"
-              checked={noticeAcknowledged}
-              onChange={(event) => setNoticeAcknowledged(event.target.checked)}
-              required
-            />
-            <span>I have read and acknowledge the legal notice above.</span>
-          </label>
+            <div className={styles.checkboxGroup}>
+              <Checkbox
+                checked={noticeAcknowledged}
+                onChange={(event) => setNoticeAcknowledged(event.target.checked)}
+                required
+                label="I have read and acknowledge the legal notice above."
+              />
+              <Checkbox
+                checked={ageAttested}
+                onChange={(event) => setAgeAttested(event.target.checked)}
+                required
+                label="I am 18 years of age or older."
+              />
+            </div>
 
-          <label className={styles.checkbox}>
-            <input
-              type="checkbox"
-              checked={ageAttested}
-              onChange={(event) => setAgeAttested(event.target.checked)}
-              required
-            />
-            <span>I am 18 years of age or older.</span>
-          </label>
+            {!ageAttested && (
+              <Alert severity="error">
+                Digital consent is only available for participants 18 or older. If you're under 18, please ask
+                MSU Denver staff for the paper photo release form instead.
+              </Alert>
+            )}
 
-          {!ageAttested && (
-            <p className={styles.ageGateMessage} role="alert">
-              Digital consent is only available for participants 18 or older. If you're under 18, please ask
-              MSU Denver staff for the paper photo release form instead.
-            </p>
-          )}
-
-          <div className={styles.field}>
-            <label htmlFor="fullName">Full name</label>
-            <input
+            <TextField
               id="fullName"
+              label="Full name"
               type="text"
               value={fullName}
               onChange={(event) => setFullName(event.target.value)}
               onBlur={() => setTouched((prev) => ({ ...prev, fullName: true }))}
               autoComplete="name"
               required
+              error={touched.fullName && !fullNameValid ? 'Name is required.' : undefined}
             />
-            {touched.fullName && !fullNameValid && <p className={styles.error}>Name is required.</p>}
-          </div>
 
-          <div className={styles.field}>
-            <label htmlFor="phone">Phone number</label>
-            <input
+            <TextField
               id="phone"
+              label="Phone number"
               type="tel"
               value={phone}
               onChange={(event) => setPhone(event.target.value)}
               onBlur={() => setTouched((prev) => ({ ...prev, phone: true }))}
               autoComplete="tel"
               required
+              error={touched.phone && !phoneValid ? 'Enter a valid phone number.' : undefined}
             />
-            {touched.phone && !phoneValid && <p className={styles.error}>Enter a valid phone number.</p>}
-          </div>
 
-          <div className={styles.field}>
-            <label htmlFor="email">Email</label>
-            <input
+            <TextField
               id="email"
+              label="Email"
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
               autoComplete="email"
               required
+              error={touched.email && !emailValid ? 'Enter a valid email address.' : undefined}
             />
-            {touched.email && !emailValid && <p className={styles.error}>Enter a valid email address.</p>}
-          </div>
 
-          <div className={styles.field}>
-            <label htmlFor="signature-pad">Signature</label>
-            <SignaturePad
-              ref={signaturePadRef}
-              onStrokeEnd={() => setHasSignature(!(signaturePadRef.current?.isEmpty() ?? true))}
-            />
-            <div className={styles.signatureActions}>
-              <button type="button" onClick={handleClearSignature}>
-                Clear
-              </button>
+            <div>
+              <label htmlFor="signature-pad" className={styles.signatureLabel}>
+                Signature
+              </label>
+              <SignaturePad
+                ref={signaturePadRef}
+                onStrokeEnd={() => setHasSignature(!(signaturePadRef.current?.isEmpty() ?? true))}
+              />
+              <div className={styles.signatureActions}>
+                <Button type="button" variant="outlined" onClick={handleClearSignature}>
+                  Clear
+                </Button>
+              </div>
             </div>
-          </div>
 
-          {submitError && (
-            <p className={styles.error} role="alert">
-              {submitError}
-            </p>
-          )}
+            {submitError && <Alert severity="error">{submitError}</Alert>}
 
-          <button
-            type="submit"
-            className={styles.submit}
-            disabled={!canSubmit || submitStatus === 'submitting'}
-            style={{ backgroundColor: canSubmit ? theme.colors.primary : undefined }}
-          >
-            {submitStatus === 'submitting' ? 'Submitting…' : 'Submit'}
-          </button>
-        </form>
+            <Button type="submit" disabled={!canSubmit || submitStatus === 'submitting'}>
+              {submitStatus === 'submitting' ? 'Submitting…' : 'Submit'}
+            </Button>
+          </form>
+        </Card>
       </main>
     </>
   )

@@ -1,4 +1,6 @@
 import { ThemedHeader } from '../components/ThemedHeader'
+import { Card } from '../components/ui/Card'
+import styles from './ConfirmationScreen.module.css'
 
 // Shown after a successful consent-form submit. Deliberately stateless — no
 // route param, no data passed in — so there is no PII to accidentally
@@ -7,9 +9,11 @@ export function ConfirmationScreen() {
   return (
     <>
       <ThemedHeader />
-      <main>
-        <h1>Thank you!</h1>
-        <p>Your photo release has been submitted.</p>
+      <main className={styles.main}>
+        <Card className={styles.card}>
+          <h1 className={styles.title}>Thank you!</h1>
+          <p>Your photo release has been submitted.</p>
+        </Card>
       </main>
     </>
   )

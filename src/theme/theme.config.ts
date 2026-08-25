@@ -10,13 +10,13 @@ export interface ThemeConfig {
 
 // Single source of truth for all brand values (NFR11) — logo, color tokens,
 // app name, legal-entity name. No component should hardcode any of these;
-// read them via useTheme() instead. Swap the values below (and the asset at
-// logoUrl) once U3 delivers the real MSU Denver brand kit — nothing else in
-// the app needs to change.
+// read them via useTheme() instead.
 export const theme: ThemeConfig = {
   appName: 'MSU Denver Photo Release',
   legalEntityName: 'Metropolitan State University of Denver',
-  logoUrl: '/theme/logo-placeholder.svg',
+  logoUrl: '/theme/msud-logo.png',
+  // Still placeholder — real MSU Denver brand hex values haven't been
+  // provided yet (see U3).
   colors: {
     primary: '#004990',
     accent: '#c8102e',
