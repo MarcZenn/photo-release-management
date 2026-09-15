@@ -47,7 +47,7 @@ export function SearchDashboardPage() {
       <form onSubmit={handleSearch} className={styles.form}>
         <TextField
           id="search-query"
-          label="Name, email, or phone"
+          label="Enter a name, email, phone number or event name"
           type="text"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
@@ -57,11 +57,11 @@ export function SearchDashboardPage() {
         </Button>
       </form>
 
-      {status === "idle" && (
+      {/* {status === "idle" && (
         <p className={styles.hint}>
           Enter a name, email, or phone number to search.
         </p>
-      )}
+      )} */}
 
       {status === "loading" && <p role="status">Searching…</p>}
 

@@ -25,6 +25,9 @@ export function DashboardLayout() {
         <NavLink to="/dashboard" end className={linkClassName}>
           Search
         </NavLink>
+        <NavLink to="/dashboard/events" className={linkClassName}>
+          Events
+        </NavLink>
         {role === 'admin' && (
           <>
             <NavLink to="/dashboard/admin/access" className={linkClassName}>
