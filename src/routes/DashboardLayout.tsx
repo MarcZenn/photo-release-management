@@ -1,8 +1,7 @@
-import { useState, type CSSProperties } from 'react'
+import { type CSSProperties } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { ThemedHeader } from '../components/ThemedHeader'
 import { GenerateQrPanel } from '../components/GenerateQrPanel'
-import { Button } from '../components/ui/Button'
 import { useAuth } from '../auth/AuthSessionProvider'
 import { useTheme } from '../theme/ThemeProvider'
 import styles from './DashboardLayout.module.css'
@@ -14,7 +13,6 @@ import styles from './DashboardLayout.module.css'
 export function DashboardLayout() {
   const { role } = useAuth()
   const theme = useTheme()
-  const [showQrPanel, setShowQrPanel] = useState(false)
 
   const cssVars = { '--nav-active-color': theme.colors.primary } as CSSProperties
   const linkClassName = ({ isActive }: { isActive: boolean }) =>
@@ -41,12 +39,9 @@ export function DashboardLayout() {
           </>
         )}
         <span className={styles.spacer} />
-        <Button type="button" variant="text" onClick={() => setShowQrPanel((prev) => !prev)}>
-          {showQrPanel ? 'Hide QR Panel' : 'Generate QR'}
-        </Button>
+        <GenerateQrPanel />
       </nav>
       <div className={styles.content}>
-        {showQrPanel && <GenerateQrPanel />}
         <Outlet />
       </div>
     </>

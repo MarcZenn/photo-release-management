@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { ThemedHeader } from '../components/ThemedHeader'
 import { SignaturePad, type SignaturePadHandle } from '../components/SignaturePad'
 import { Card } from '../components/ui/Card'
-import { TextField } from '../components/ui/TextField'
+import { TextField, TextAreaField } from '../components/ui/TextField'
 import { Checkbox } from '../components/ui/Checkbox'
 import { Button } from '../components/ui/Button'
 import { Alert } from '../components/ui/Alert'
@@ -36,6 +36,7 @@ export function ConsentFormPage() {
   const [noticeAcknowledged, setNoticeAcknowledged] = useState(false)
   const [ageAttested, setAgeAttested] = useState(false)
   const [hasSignature, setHasSignature] = useState(false)
+  const [appearanceDescription, setAppearanceDescription] = useState('')
   const [touched, setTouched] = useState<TouchedFields>({ fullName: false, phone: false, email: false })
 
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus>('idle')
@@ -112,6 +113,7 @@ export function ConsentFormPage() {
         signatureImage: signaturePadRef.current?.toDataUrl() ?? '',
         ageAttested,
         noticeAcknowledged,
+        appearanceDescription,
       })
       navigate('/consent/confirmation')
     } catch (err) {
@@ -234,6 +236,14 @@ export function ConsentFormPage() {
                 </Button>
               </div>
             </div>
+
+            <TextAreaField
+              id="appearanceDescription"
+              label="What are you wearing today? (helps our photographers find your photo later)"
+              value={appearanceDescription}
+              onChange={(event) => setAppearanceDescription(event.target.value)}
+              maxLength={500}
+            />
 
             {submitError && <Alert severity="error">{submitError}</Alert>}
 

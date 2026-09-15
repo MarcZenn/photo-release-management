@@ -16,8 +16,8 @@ export interface ConsentTokenStatus {
 // Staff-authenticated. Called from the dashboard shell (I1) to mint a fresh
 // token for a QR code — the token allows unlimited submissions until it
 // expires (product decision, 2026-08-21), not just one.
-export async function generateConsentToken(): Promise<ConsentToken> {
-  const { data, error } = await supabase.rpc('generate_consent_token')
+export async function generateConsentToken(eventId: string): Promise<ConsentToken> {
+  const { data, error } = await supabase.rpc('generate_consent_token', { event_id: eventId })
   if (error) throw error
   return { tokenId: data.tokenId, expiresAt: data.expiresAt }
 }
@@ -31,6 +31,36 @@ export async function getConsentTokenStatus(tokenId: string): Promise<ConsentTok
   return data as ConsentTokenStatus
 }
 
+export interface ActiveConsentToken {
+  tokenId: string
+  eventId: string
+  eventName: string
+  expiresAt: string
+}
+
+interface ActiveConsentTokenFromApi {
+  token_id: string
+  event_id: string
+  event_name: string
+  expires_at: string
+}
+
+// Staff-authenticated. Feeds GenerateQrPanel's "Use Existing QR code" list —
+// every currently-unexpired token, system-wide (not scoped to the calling
+// staff member — see the migration note), so any active QR a colleague
+// already generated can be picked back up and redisplayed without minting a
+// new token.
+export async function listActiveConsentTokens(): Promise<ActiveConsentToken[]> {
+  const { data, error } = await supabase.rpc('list_active_consent_tokens')
+  if (error) throw error
+  return (data as ActiveConsentTokenFromApi[]).map((row) => ({
+    tokenId: row.token_id,
+    eventId: row.event_id,
+    eventName: row.event_name,
+    expiresAt: row.expires_at,
+  }))
+}
+
 export interface CreatePhotoReleaseInput {
   consentToken: string
   fullName: string
@@ -39,6 +69,7 @@ export interface CreatePhotoReleaseInput {
   signatureImage: string
   ageAttested: boolean
   noticeAcknowledged: boolean
+  appearanceDescription?: string
 }
 
 export interface CreatePhotoReleaseResult {
@@ -68,6 +99,7 @@ export async function createPhotoRelease(input: CreatePhotoReleaseInput): Promis
     signature_image: input.signatureImage,
     age_attested: input.ageAttested,
     notice_acknowledged: input.noticeAcknowledged,
+    appearance_description: input.appearanceDescription?.trim() || null,
   })
   if (error) throw error
   return { releaseId: data.releaseId, submittedAt: data.submittedAt }

@@ -1,10 +1,5 @@
 import { supabase } from './supabaseClient'
 
-export interface EventSuggestion {
-  id: string
-  name: string
-}
-
 export interface EventSummary {
   id: string
   name: string
@@ -22,14 +17,6 @@ interface EventSummaryFromApi {
 export interface FindOrCreateEventResult {
   eventId: string
   name: string
-}
-
-// Staff-authenticated. Feeds GenerateQrPanel's event-name <datalist> as the
-// staff member types — trigram match, limit 20.
-export async function listEventSuggestions(query: string): Promise<EventSuggestion[]> {
-  const { data, error } = await supabase.rpc('list_events', { query })
-  if (error) throw error
-  return data as EventSuggestion[]
 }
 
 // Staff-authenticated. Feeds /dashboard/events — every event with its
