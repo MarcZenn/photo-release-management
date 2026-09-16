@@ -13,7 +13,7 @@
 
 .form > div:first-child {
   flex: 1;
-  max-width: 75%;
+  width: 75%;
 }
 
 .hint,

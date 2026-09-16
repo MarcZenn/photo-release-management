@@ -73,6 +73,10 @@ export function RecordDetailPage() {
           <dd>{record.phone}</dd>
           <dt>Email</dt>
           <dd>{record.email}</dd>
+          <dt>Event</dt>
+          <dd>{record.eventName ?? '—'}</dd>
+          <dt>Appearance notes</dt>
+          <dd>{record.appearanceDescription ?? '—'}</dd>
           <dt>Submitted</dt>
           <dd>{new Date(record.submittedAt).toLocaleString()}</dd>
           <dt>Legal notice version</dt>
