@@ -150,12 +150,12 @@ export function AdminLegalNoticeManagementPage() {
         <tbody>
           {versions.map((row) => (
             <tr key={row.versionId}>
-              <td>{new Date(row.effectiveAt).toLocaleString()}</td>
-              <td>{row.sourceReference}</td>
-              <td className={styles.noticeTextCell} title={row.noticeText}>
+              <td data-label="Effective At">{new Date(row.effectiveAt).toLocaleString()}</td>
+              <td data-label="Source Reference">{row.sourceReference}</td>
+              <td data-label="Notice Text" className={styles.noticeTextCell} title={row.noticeText}>
                 {row.noticeText}
               </td>
-              <td>
+              <td data-label="Created By / At">
                 {row.createdBy} · {new Date(row.createdAt).toLocaleDateString()}
               </td>
             </tr>

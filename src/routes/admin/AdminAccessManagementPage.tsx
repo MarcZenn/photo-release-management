@@ -188,9 +188,9 @@ export function AdminAccessManagementPage() {
 
             return (
               <tr key={row.email}>
-                <td>{row.email}</td>
-                <td className={styles.roleCell}>{row.role}</td>
-                <td>
+                <td data-label="Email">{row.email}</td>
+                <td data-label="Role" className={styles.roleCell}>{row.role}</td>
+                <td data-label="Status">
                   <span
                     className={[
                       styles.statusChip,
@@ -200,12 +200,12 @@ export function AdminAccessManagementPage() {
                     {row.status}
                   </span>
                 </td>
-                <td>
+                <td data-label="Granted / Revoked">
                   {row.status === 'active'
                     ? `${row.grantedBy} · ${new Date(row.grantedAt).toLocaleDateString()}`
                     : `${row.revokedBy} · ${row.revokedAt ? new Date(row.revokedAt).toLocaleDateString() : ''}`}
                 </td>
-                <td>
+                <td data-label="Actions">
                   {row.status === 'active' ? (
                     isPendingRevoke ? (
                       <div className={styles.confirm}>

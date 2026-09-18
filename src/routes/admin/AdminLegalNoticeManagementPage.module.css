@@ -34,6 +34,18 @@
   white-space: nowrap;
 }
 
+/* The desktop truncation relies on the title="" tooltip to reveal the full
+   text on hover — there's no hover on a touchscreen, so on the mobile card
+   layout the full text needs to actually be there instead of clipped. */
+@media (max-width: 640px) {
+  .noticeTextCell {
+    max-width: none;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+  }
+}
+
 .form {
   display: flex;
   flex-direction: column;

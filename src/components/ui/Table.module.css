@@ -8,6 +8,7 @@
 
 .table {
   width: 100%;
+  min-width: 640px;
   border-collapse: collapse;
 }
 
@@ -37,4 +38,67 @@
 
 .table tbody tr:hover {
   background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Below 640px a table stops reading as a table at all — scrolling a wide
+   grid sideways on a phone is worse than just not having columns. Each
+   row becomes its own card instead, with every cell's column header
+   turned into a label above its value via data-label (see the four pages
+   using this component — every <td> carries one). */
+@media (max-width: 640px) {
+  .wrapper {
+    background-color: transparent;
+    box-shadow: none;
+    border-radius: 0;
+    overflow: visible;
+  }
+
+  .table {
+    min-width: 0;
+  }
+
+  .table thead {
+    display: none;
+  }
+
+  .table,
+  .table tbody,
+  .table tr,
+  .table td {
+    display: block;
+    width: 100%;
+  }
+
+  .table tbody tr {
+    margin-bottom: 0.75rem;
+    background-color: var(--md-surface);
+    border: 1px solid var(--md-divider);
+    border-radius: var(--md-radius-lg);
+    box-shadow: var(--md-shadow-1);
+    padding: 0.25rem 1rem;
+  }
+
+  .table tbody tr:last-child {
+    margin-bottom: 0;
+  }
+
+  .table td {
+    padding: 0.625rem 0;
+    border-bottom: 1px solid var(--md-divider);
+  }
+
+  .table td:last-child {
+    border-bottom: none;
+  }
+
+  .table td::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--md-text-secondary);
+    margin-bottom: 0.25rem;
+  }
 }

@@ -73,7 +73,7 @@ export function EventsListPage() {
         <tbody>
           {events.map((event) => (
             <tr key={event.id}>
-              <td>
+              <td data-label="Name">
                 {editingId === event.id ? (
                   <TextField
                     id={`rename-${event.id}`}
@@ -91,10 +91,10 @@ export function EventsListPage() {
                   </button>
                 )}
               </td>
-              <td>{event.submissionCount}</td>
-              <td>{new Date(event.createdAt).toLocaleDateString()}</td>
+              <td data-label="# Releases">{event.submissionCount}</td>
+              <td data-label="Created">{new Date(event.createdAt).toLocaleDateString()}</td>
               {role === "admin" && (
-                <td>
+                <td data-label="Actions">
                   {editingId === event.id ? (
                     <div className={styles.actions}>
                       <Button

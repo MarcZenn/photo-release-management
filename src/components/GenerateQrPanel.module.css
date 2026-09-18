@@ -87,3 +87,20 @@
   font-weight: 500;
   color: var(--md-text-secondary);
 }
+
+/* Floating action button, fixed bottom-right of the viewport, at every
+   screen size — not a nav item. A contained button at full size crowded
+   the nav bar next to the hamburger toggle on mobile; fixed positioning
+   takes it out of the nav's layout flow entirely, and staying reachable
+   from anywhere on the page (not just when the nav happens to be in view)
+   is the whole reason staff reach for this in the field, on desktop too. */
+.trigger {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  z-index: 20;
+  min-height: 56px;
+  padding: 0 24px;
+  border-radius: 28px;
+  box-shadow: var(--md-shadow-3);
+}

@@ -128,11 +128,11 @@ export function GenerateQrPanel() {
 
   return (
     <>
-      <Button type="button" variant="text" onClick={handleOpenGenerate}>
-        Generate QR
+      <Button type="button" variant="contained" className={styles.trigger} onClick={handleOpenGenerate}>
+        Generate QR Code
       </Button>
       {hasReopenableQr && !modalOpen && (
-        <Button type="button" variant="text" onClick={() => setModalOpen(true)}>
+        <Button type="button" variant="text" className={styles.trigger} onClick={() => setModalOpen(true)}>
           Show QR
         </Button>
       )}

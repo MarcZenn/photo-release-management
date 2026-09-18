@@ -138,10 +138,10 @@ export function AdminAuditLogPage() {
           <tbody>
             {rows.map((row) => (
               <tr key={row.id}>
-                <td>{row.actorEmail}</td>
-                <td>{row.action}</td>
-                <td>{row.targetId ?? '—'}</td>
-                <td>{new Date(row.createdAt).toLocaleString()}</td>
+                <td data-label="Actor">{row.actorEmail}</td>
+                <td data-label="Action">{row.action}</td>
+                <td data-label="Target">{row.targetId ?? '—'}</td>
+                <td data-label="Timestamp">{new Date(row.createdAt).toLocaleString()}</td>
               </tr>
             ))}
           </tbody>

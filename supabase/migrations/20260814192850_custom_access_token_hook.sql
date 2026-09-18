@@ -15,7 +15,7 @@ create extension if not exists dblink;
 
 do $$
 declare
-  generated_password text := encode(gen_random_bytes(32), 'hex');
+  generated_password text := encode(extensions.gen_random_bytes(32), 'hex');
 begin
   execute format('create role audit_writer with login password %L', generated_password);
   perform vault.create_secret(
